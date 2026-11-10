@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b6b61">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Lương Gia Sư">
+  <meta name="description" content="Ứng dụng tính lương gia sư, lịch dạy và quản lý buổi vắng theo tháng.">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <link rel="icon" href="./icon-192.png" type="image/png">
+  <title>Lương Gia Sư – Lịch dạy & thu nhập</title>
+  <style>
+    :root { color-scheme:light; --bg:#f4f7f6; --surface:#fff; --ink:#15312e; --muted:#697f7a; --line:#dfe8e5; --mint:#e9f6f0; --green:#0b6b61; --dark:#084f49; --blue:#ecf2ff; --warn:#a94d33; --warnbg:#fff0e9; --shadow:0 10px 35px rgba(18,56,50,.055); --radius:19px; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-width:315px; font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg); color:var(--ink); -webkit-tap-highlight-color:transparent; }
+    button,input,select { font:inherit; }
+    button { cursor:pointer; }
+    button:disabled { cursor:not-allowed; opacity:.52; }
+    button:focus-visible,input:focus-visible { outline:3px solid #68a9a0; outline-offset:2px; }
+    .wrap { width:min(1160px,calc(100% - 36px)); margin:0 auto; }
+    header { background:var(--surface); border-bottom:1px solid var(--line); }
+    .head { display:flex; justify-content:space-between; align-items:center; gap:15px; padding:19px 0; }
+    .identity { display:flex; align-items:center; gap:13px; }
+    .logo { display:grid; place-items:center; border-radius:15px; width:46px; height:46px; background:var(--green); color:#fff; box-shadow:0 5px 13px #0b6b6133; font-size:25px; font-weight:850; }
+    h1,h2,h3,p { margin:0; }
+    h1 { font-size:21px; letter-spacing:-.6px; line-height:1.25; }
+    .subtitle { color:var(--muted); font-size:13px; margin-top:3px; }
+    .actions,.toolbar,.mini-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .btn { border:1px solid var(--line); border-radius:11px; background:#fff; color:var(--ink); padding:10px 14px; font-weight:650; min-height:42px; }
+    .btn:hover { background:#f4f9f7; }
+    .btn.primary { background:var(--green); color:white; border-color:var(--green); }
+    .btn.primary:hover { background:var(--dark); }
+    .btn.danger { color:var(--warn); border-color:#f0cbc1; }
+    .btn.small { padding:6px 11px; min-height:34px; font-size:13px; }
+    main { padding:29px 0 45px; }
+    .eyebrow { color:var(--green); letter-spacing:1.4px; text-transform:uppercase; font-size:11px; font-weight:850; margin-bottom:5px; }
+    .overview-top { display:flex; justify-content:space-between; align-items:end; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+    .overview-top h2 { font-size:25px; letter-spacing:-.8px; }
+    .overview-top p { color:var(--muted); font-size:13px; }
+    .summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-bottom:22px; }
+    .summary-card { min-width:0; padding:20px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); box-shadow:var(--shadow); }
+    .summary-card.prominent { color:white; background:linear-gradient(145deg,#0c756a,#084c48); border-color:transparent; }
+    .summary-card .label { font-size:13px; color:var(--muted); }
+    .summary-card.prominent .label { color:#daf4ec; }
+    .summary-card strong { display:block; font-size:27px; margin:8px 0 4px; letter-spacing:-1.1px; line-height:1.2; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+    .summary-card .hint { font-size:12px; color:var(--muted); }
+    .summary-card.prominent .hint { color:#c2e5dd; }
+    .layout { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(290px,.94fr); gap:19px; align-items:start; }
+    .panel { min-width:0; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:21px; box-shadow:var(--shadow); }
+    .panel-head { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+    .panel h3 { font-size:18px; letter-spacing:-.3px; }
+    .muted { color:var(--muted); }
+    .months { display:flex; gap:8px; align-items:center; }
+    .arrow-btn { width:37px; height:37px; border:1px solid var(--line); background:white; border-radius:10px; font-size:21px; color:var(--green); }
+    .month-picker { color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:7px 8px; min-width:142px; max-width:165px; background:white; font-size:14px; }
+    .days-head,.calendar { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; }
+    .days-head { margin-bottom:7px; }
+    .days-head span { text-align:center; font-size:12px; font-weight:800; color:var(--muted); padding:6px 0; }
+    .day { min-height:85px; width:100%; border:1px solid #e8eeeb; border-radius:11px; background:#fff; padding:7px 4px; display:flex; flex-direction:column; align-items:center; gap:5px; text-align:center; color:var(--ink); transition:background .12s; }
+    .day:hover { background:#f4f9f7; }
+    .day.placeholder { visibility:hidden; pointer-events:none; }
+    .day.today .day-number { background:var(--green); color:white; }
+    .day.selected { outline:2px solid var(--green); border-color:var(--green); outline-offset:-1px; background:#f1faf6; }
+    .day-number { font-size:14px; font-weight:800; border-radius:30px; min-width:28px; height:28px; display:grid; place-items:center; }
+    .day-pay { background:var(--mint); color:var(--green); font-size:10px; font-weight:800; border-radius:6px; padding:2px 4px; white-space:nowrap; max-width:100%; }
+    .day-sub { color:var(--muted); font-size:10px; line-height:1.15; }
+    .day-sub.absent { color:var(--warn); }
+    .detail { margin-top:21px; border-top:1px solid var(--line); padding-top:19px; }
+    .detail-head { display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:12px; }
+    .detail-head h3 { font-size:16px; }
+    .lesson { display:flex; align-items:center; justify-content:space-between; gap:11px; padding:13px 0; border-bottom:1px solid var(--line); }
+    .lesson:last-child { border-bottom:0; }
+    .lesson-main { min-width:0; }
+    .lesson-name { font-weight:750; }
+    .lesson-meta { color:var(--muted); font-size:12px; overflow-wrap:anywhere; }
+    .lesson-side { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+    .lesson-pay { font-weight:780; white-space:nowrap; }
+    .lesson-pay.crossed { text-decoration:line-through; color:var(--muted); }
+    .absent-flag { display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer; color:var(--warn); font-weight:650; }
+    .absent-flag input { width:17px; height:17px; margin:0; accent-color:var(--warn); }
+    .no-lessons,.empty { background:#f8fbfa; padding:18px; border:1px dashed #d3e0d9; border-radius:12px; color:var(--muted); text-align:center; font-size:13px; }
+    .list { display:flex; flex-direction:column; gap:11px; }
+    .class-card { overflow:hidden; border-radius:13px; border:1px solid var(--line); }
+    .class-open { display:block; width:100%; padding:15px; text-align:left; background:transparent; color:var(--ink); border:0; }
+    .class-open:hover, .class-open:focus-visible { background:#f2faf6; }
+    .class-controls { display:flex; justify-content:flex-end; padding:0 15px 13px; }
+    .view-detail { font-weight:800; color:var(--green); white-space:nowrap; }
+    .class-details { margin-top:8px; display:flex; justify-content:space-between; gap:9px; font-size:12px; color:var(--muted); }
+    .class-top { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+    .class-title { font-weight:800; font-size:15px; }
+    .class-student { color:var(--muted); font-size:12px; }
+    .class-fee { color:var(--green); font-size:14px; font-weight:850; white-space:nowrap; }
+    .chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:12px; }
+    .chip { color:#43665d; background:#eaf5f0; font-size:11px; font-weight:760; padding:4px 7px; border-radius:7px; }
+    .chip.stopped { color:#8d5a46; background:#fff0e9; }
+    .class-foot { display:flex; align-items:center; justify-content:space-between; gap:9px; border-top:1px solid var(--line); padding-top:12px; margin-top:12px; }
+    .class-foot span { font-size:12px; color:var(--muted); }
+    .history-panel { margin-top:20px; }
+    .history-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
+    .history-item { text-align:left; background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px; }
+    .history-item:hover { background:#f2f9f6; border-color:#93c8b9; }
+    .history-item span { color:var(--muted); font-size:12px; display:block; }
+    .history-item strong { display:block; color:var(--green); font-size:16px; margin-top:5px; font-variant-numeric:tabular-nums; }
+    .note { margin-top:16px; color:var(--muted); font-size:12px; line-height:1.6; }
+    .note strong { color:#45695f; }
+    dialog { border:0; border-radius:20px; background:white; width:min(500px,calc(100% - 25px)); padding:0; box-shadow:0 20px 60px rgba(0,0,0,.25); max-height:min(90vh,800px); overflow:auto; }
+    dialog::backdrop { background:rgba(9,32,30,.55); }
+    .dialog-body { padding:24px; }
+    .dialog-head { display:flex; justify-content:space-between; gap:10px; margin-bottom:15px; align-items:start; }
+    .dialog-head h2 { font-size:23px; }
+    .icon-btn { border:0; background:#eef5f1; color:var(--ink); width:33px; height:33px; border-radius:9px; font-size:21px; }
+    .field { display:flex; flex-direction:column; gap:6px; margin-top:14px; }
+    .field span { font-weight:750; font-size:13px; }
+    .field small { font-size:11px; font-weight:450; color:var(--muted); }
+    .detail-dialog { width:min(650px,calc(100% - 24px)); }
+    .detail-months { margin:14px 0 17px; display:flex; align-items:center; gap:9px; }
+    .detail-months .month-picker { flex:1; max-width:none; text-align:center; }
+    .class-stat-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+    .class-stat { background:#f1f8f5; border:1px solid #e2eee7; border-radius:12px; padding:12px; min-width:0; }
+    .class-stat .label { color:#52736c; font-size:11px; }
+    .class-stat strong { display:block; margin-top:5px; font-size:clamp(14px,3.4vw,20px); color:var(--green); overflow-wrap:anywhere; }
+    .class-section { border-top:1px solid var(--line); margin-top:20px; padding-top:18px; }
+    .class-section-head { display:flex; justify-content:space-between; gap:12px; align-items:baseline; margin-bottom:9px; }
+    .class-section h3 { font-size:16px; }
+    .detail-session { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 0; border-bottom:1px solid var(--line); }
+    .detail-session:last-child { border-bottom:0; }
+    .detail-session .session-date { font-weight:750; }
+    .detail-session .session-fee { color:var(--muted); font-size:12px; }
+    .session-right { display:flex; gap:10px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
+    .session-future { color:#a07d3e; font-size:11px; }
+    .session-attended { color:var(--green); font-size:11px; font-weight:750; }
+    .parent-message { width:100%; min-height:250px; resize:vertical; padding:13px; line-height:1.65; font-size:14px; color:var(--ink); border:1px solid #cadbd4; border-radius:11px; background:#fbfdfc; }
+    .message-actions { margin-top:12px; display:flex; gap:9px; flex-wrap:wrap; }
+    .message-actions button { flex:1; }
+    .mini-hint { font-size:12px; line-height:1.55; color:var(--muted); margin-top:7px; }
+    .field input { width:100%; border:1px solid #cadbd4; border-radius:10px; padding:11px 12px; background:#fff; color:var(--ink); min-height:45px; }
+    .week-select { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:8px; }
+    .week-select label { position:relative; cursor:pointer; }
+    .week-select input { position:absolute; opacity:0; width:100%; height:100%; inset:0; cursor:pointer; }
+    .week-select span { display:block; text-align:center; padding:10px 2px; border:1px solid var(--line); border-radius:10px; font-weight:850; color:var(--muted); font-size:12px; }
+    .week-select input:checked + span { background:var(--green); color:white; border-color:var(--green); }
+    .week-select input:focus-visible + span { outline:3px solid #68a9a0; outline-offset:2px; }
+    .form-footer { border-top:1px solid var(--line); margin-top:22px; padding-top:16px; display:flex; justify-content:space-between; gap:12px; align-items:center; }
+    .inline-note { margin-top:12px; padding:10px 12px; border-radius:10px; color:#516e66; background:#f0f7f4; font-size:12px; }
+    .toast { position:fixed; z-index:1000; left:50%; bottom:25px; transform:translateX(-50%) translateY(15px); background:#143f39; color:white; padding:12px 17px; border-radius:11px; box-shadow:0 9px 30px #0003; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; max-width:calc(100vw - 35px); text-align:center; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    @media (max-width:900px) { .layout { grid-template-columns:1fr; } .history-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media (max-width:570px) {
+      .wrap { width:calc(100% - 24px); } .head { padding:13px 0; } .head .actions { width:100%; } .head .actions button { flex:1; }
+      .head { flex-wrap:wrap; } h1 { font-size:19px; } main { padding-top:23px; }
+      .overview-top h2 { font-size:23px; } .summary { gap:8px; margin-bottom:14px; } .summary-card { padding:13px 10px; border-radius:13px; }
+      .summary-card .label { font-size:11px; line-height:1.25; min-height:29px; } .summary-card strong { font-size:clamp(14px,4.2vw,21px); letter-spacing:-.5px; } .summary-card .hint { font-size:10px; }
+      .panel { padding:13px; border-radius:15px; } .panel h3 { font-size:16px; } .panel-head { align-items:flex-start; gap:9px; } .months { width:100%; justify-content:space-between; }
+      .month-picker { flex:1; max-width:none; } .days-head,.calendar { gap:3px; } .day { min-height:74px; border-radius:8px; padding:5px 1px; gap:4px; }
+      .day-pay { font-size:9px; padding:2px 2px; letter-spacing:-.3px; } .day-sub { font-size:9px; } .day-number { font-size:12px; height:23px; min-width:23px; }
+      .lesson { align-items:flex-start; } .lesson-name { font-size:13px; } .lesson-pay { font-size:12px; } .history-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .class-stat { padding:10px 8px; } .class-stat .label { font-size:10px; }
+      .detail-session { align-items:flex-start; } .session-right { flex-direction:column; align-items:flex-end; gap:6px; }
+      .dialog-body { padding:18px; } .form-footer { flex-wrap:wrap; } .form-footer .btn { flex:1; } .week-select { gap:4px; }
+    }
+  </style>
+</head>
+<body>
+  <header><div class="wrap head">
+    <div class="identity"><div class="logo" aria-hidden="true">₫</div><div><h1>Lương Gia Sư</h1><p class="subtitle">Lịch dạy thông minh · Tính lương tự động</p></div></div>
+    <div class="actions"><button type="button" id="backupBtn" class="btn">↓ Sao lưu</button><button type="button" id="restoreBtn" class="btn">↑ Khôi phục</button><button type="button" id="addBtn" class="btn primary">+ Thêm lớp</button></div>
+  </div></header>
+  <main class="wrap">
+    <section aria-labelledby="overviewTitle"><div class="overview-top"><div><div class="eyebrow">Thu nhập gia sư</div><h2 id="overviewTitle">Tổng quan</h2><p id="overviewDesc">Các buổi dạy được tự động xếp vào lịch</p></div></div>
+      <div class="summary" aria-live="polite">
+        <div class="summary-card prominent"><div class="label" id="mainSalaryLabel">Lương tháng</div><strong id="monthSalary">0 ₫</strong><div class="hint" id="monthSessions">0 buổi được tính lương</div></div>
+        <div class="summary-card"><div class="label">Đã đến ngày dạy</div><strong id="earnedSalary">0 ₫</strong><div class="hint" id="earnedSessions">0 buổi không vắng</div></div>
+        <div class="summary-card"><div class="label">Buổi nghỉ / vắng</div><strong id="absentCount">0</strong><div class="hint" id="absentLoss">0 ₫ không tính lương</div></div>
+      </div>
+    </section>
+    <div class="layout">
+      <section class="panel" aria-labelledby="calendarTitle">
+        <div class="panel-head"><div><h3 id="calendarTitle">Lịch dạy tháng</h3><p class="subtitle">Chọn ngày để đánh dấu buổi vắng</p></div><div class="months"><button type="button" class="arrow-btn" id="prevMonth" aria-label="Tháng trước">‹</button><input id="monthPicker" class="month-picker" type="month" aria-label="Chọn tháng cần xem"><button type="button" class="arrow-btn" id="nextMonth" aria-label="Tháng sau">›</button></div></div>
+        <div class="days-head" aria-hidden="true"><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span></div>
+        <div id="calendar" class="calendar" role="group" aria-label="Các ngày trong tháng"></div>
+        <div class="detail"><div class="detail-head"><h3 id="detailDate">Chi tiết ngày dạy</h3><span id="detailTotal" class="muted"></span></div><div id="lessons"></div></div>
+      </section>
+      <div>
+        <section class="panel" aria-labelledby="classesTitle"><div class="panel-head"><div><h3 id="classesTitle">Môn / lớp đang dạy</h3><p class="subtitle">Nhấn vào lớp để xem học phí, ngày nghỉ và tin nhắn phụ huynh</p></div><button type="button" id="addSmall" class="btn small primary">+ Thêm</button></div><div id="classList" class="list"></div></section>
+        <section class="panel history-panel" aria-labelledby="historyTitle"><div class="panel-head"><div><h3 id="historyTitle">Lịch sử thu nhập</h3><p class="subtitle">Chọn tháng để xem lại chi tiết</p></div></div><div id="history" class="history-grid"></div></section>
+        <p class="note"><strong>Cách tính:</strong> Mỗi buổi theo lịch được tính lương, trừ khi bạn đánh dấu <strong>Nghỉ / vắng</strong>. Với tháng hiện tại hoặc tương lai, <strong>Lương tháng</strong> là số tiền dự kiến; mục <strong>Đã đến ngày dạy</strong> chỉ tính các ngày không muộn hơn hôm nay. Dữ liệu lưu trên thiết bị này; hãy <strong>Sao lưu</strong> thường xuyên vì xóa dữ liệu Safari có thể làm mất lịch sử.</p>
+      </div>
+    </div>
+  </main>
+  <dialog id="classDialog" aria-labelledby="dialogTitle"><div class="dialog-body"><div class="dialog-head"><div><div class="eyebrow">Thiết lập lịch dạy</div><h2 id="dialogTitle">Thêm lớp mới</h2></div><button type="button" class="icon-btn" id="closeDialog" aria-label="Đóng">×</button></div>
+    <form id="classForm">
+      <label class="field"><span>Tên môn / lớp *</span><input type="text" id="subject" maxlength="80" placeholder="Ví dụ: Toán 11 – Minh Anh" required></label>
+      <label class="field"><span>Tên học sinh <small>(không bắt buộc)</small></span><input type="text" id="student" maxlength="80" placeholder="Ví dụ: Minh Anh"></label>
+      <label class="field"><span>Tiền 1 buổi (VNĐ) *</span><input type="number" id="fee" inputmode="numeric" min="0" step="1000" placeholder="Ví dụ: 200000" required></label>
+      <div class="field"><span>Học vào thứ mấy? *</span><div class="week-select" id="weekSelect" role="group" aria-label="Chọn các thứ học">
+        <label><input type="checkbox" value="1"><span>T2</span></label><label><input type="checkbox" value="2"><span>T3</span></label><label><input type="checkbox" value="3"><span>T4</span></label><label><input type="checkbox" value="4"><span>T5</span></label><label><input type="checkbox" value="5"><span>T6</span></label><label><input type="checkbox" value="6"><span>T7</span></label><label><input type="checkbox" value="0"><span>CN</span></label>
+      </div></div>
+      <label class="field"><span id="effectiveLabel">Bắt đầu dạy từ ngày *</span><input type="date" id="effective" required><small id="effectiveHint">Lịch sẽ tự xuất hiện từ ngày này trở đi.</small></label>
+      <div class="inline-note" id="formNote">Bạn có thể chọn nhiều thứ. Ví dụ chọn T3 và T5: app tự tạo các buổi học vào thứ Ba và thứ Năm hàng tuần.</div>
+      <div class="form-footer"><div class="mini-actions"><button type="button" id="stopClass" class="btn small danger" hidden>Ngừng lớp</button><button type="button" id="deleteClass" class="btn small danger" hidden>Xóa lớp</button></div><div class="mini-actions"><button type="button" id="cancelDialog" class="btn">Hủy</button><button type="submit" class="btn primary">Lưu lớp</button></div></div>
+    </form>
+  </div></dialog>
+  <dialog id="classDetailDialog" class="detail-dialog" aria-labelledby="classDetailTitle">
+    <div class="dialog-body">
+      <div class="dialog-head">
+        <div><div class="eyebrow">Báo cáo học phí từng lớp</div><h2 id="classDetailTitle">Chi tiết lớp học</h2><p class="subtitle" id="classDetailStudent"></p></div>
+        <button type="button" id="closeClassDetail" class="icon-btn" aria-label="Đóng chi tiết">×</button>
+      </div>
+      <div class="detail-months">
+        <button type="button" id="detailPrev" class="arrow-btn" aria-label="Tháng trước">‹</button>
+        <input type="month" class="month-picker" id="detailMonth" aria-label="Chọn tháng xem riêng cho lớp">
+        <button type="button" id="detailNext" class="arrow-btn" aria-label="Tháng sau">›</button>
+      </div>
+      <div id="classDetailStats" class="class-stat-grid" aria-live="polite"></div>
+      <p id="classDetailFootnote" class="mini-hint"></p>
+      <section class="class-section" aria-labelledby="classSessionsHeading">
+        <div class="class-section-head"><h3 id="classSessionsHeading">Các ngày học và ngày nghỉ</h3><span id="classSessionSummary" class="muted"></span></div>
+        <div id="classDetailSessions"></div>
+        <p class="mini-hint">Bạn có thể đánh dấu <strong>Nghỉ / vắng</strong> ngay tại đây. Ngày nghỉ sẽ không tính học phí.</p>
+      </section>
+      <section class="class-section" aria-labelledby="messageHeading">
+        <div class="class-section-head"><h3 id="messageHeading">Tin nhắn gửi phụ huynh</h3></div>
+        <p class="mini-hint" style="margin:0 0 10px">Tin được soạn tự động từ lịch học. Với tháng hiện tại, chỉ tính các buổi đến hôm nay. Ngày học đã qua mà chưa đánh dấu nghỉ sẽ được xem là đã dạy. Hãy kiểm tra trước khi gửi và sửa nội dung nếu cần.</p>
+        <label for="parentMessage" class="field" style="margin:0"><span>Nội dung tin nhắn</span></label>
+        <textarea id="parentMessage" class="parent-message" rows="10" aria-label="Nội dung tin nhắn gửi phụ huynh"></textarea>
+        <div class="message-actions">
+          <button type="button" id="regenParentMessage" class="btn">↻ Tạo lại tin</button>
+          <button type="button" id="copyParentMessage" class="btn primary">Sao chép</button>
+          <button type="button" id="shareParentMessage" class="btn">Chia sẻ…</button>
+        </div>
+        <p class="mini-hint">Nhấn <strong>Sao chép</strong> để dán vào Zalo, Messenger hoặc SMS. <strong>Chia sẻ</strong> sẽ mở bảng chia sẻ của thiết bị nếu được hỗ trợ; ứng dụng không tự gửi tin cho phụ huynh.</p>
+      </section>
+    </div>
+  </dialog>
+  <input type="file" accept=".json,application/json" id="restoreFile" hidden>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script>
+    'use strict';
+    const KEY = 'luong-gia-su-pwa-v1';
+    const $ = s => document.querySelector(s);
+    const fmt = n => new Intl.NumberFormat('vi-VN').format(Math.round(n || 0)) + ' ₫';
+    const shortMoney = n => n >= 1000000 ? (Math.round(n/100000)/10).toLocaleString('vi-VN') + 'tr' : n >= 1000 ? Math.round(n/1000).toLocaleString('vi-VN') + 'k' : n.toLocaleString('vi-VN');
+    const p2 = n => String(n).padStart(2,'0');
+    const ymd = (y,m,d) => `${y}-${p2(m+1)}-${p2(d)}`;
+    const dateFrom = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d); };
+    const dayBefore = s => { const d = dateFrom(s); d.setDate(d.getDate()-1); return ymd(d.getFullYear(),d.getMonth(),d.getDate()); };
+    const addMonth = (v,delta) => { const [y,m] = v.split('-').map(Number); let d = new Date(y,m-1+delta,1); return `${d.getFullYear()}-${p2(d.getMonth()+1)}`; };
+    const today = () => { const d = new Date(); return ymd(d.getFullYear(),d.getMonth(),d.getDate()); };
+    const escapeHTML = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const days = ['CN','T2','T3','T4','T5','T6','T7'];
+    const orderDays = [1,2,3,4,5,6,0];
+    const validDate = s => /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(dateFrom(s).getTime()) && ymd(dateFrom(s).getFullYear(),dateFrom(s).getMonth(),dateFrom(s).getDate())===s;
+    const newId = () => (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') ? crypto.randomUUID() : `lop-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    let store = {classes:[], absence:{}};
+    let viewedMonth = today().slice(0,7);
+    let selectedDay = today();
+    let editingId = null;
+    let detailClassId = null;
+    let detailMonth = viewedMonth;
+    let toastTimeout;
+    try { const raw=localStorage.getItem(KEY); if(raw) store=validate(JSON.parse(raw)); } catch(err) { console.warn('Không đọc được dữ liệu:',err); }
+    function validate(value) {
+      if(!value || !Array.isArray(value.classes) || typeof value.absence!=='object' || value.absence===null || Array.isArray(value.absence)) throw Error('Dữ liệu không đúng định dạng');
+      if(value.classes.length>500) throw Error('Quá nhiều lớp');
+      const classes = value.classes.map(c=>{
+        if(typeof c.id!=='string' || !c.id || !Array.isArray(c.revisions) || !c.revisions.length || c.revisions.length>100) throw Error('Lịch lớp không hợp lệ');
+        if(c.endDate && !validDate(c.endDate)) throw Error('Ngày ngừng lớp không hợp lệ');
+        const revisions=c.revisions.map(r=>{
+          if(!validDate(r.effective) || typeof r.subject!=='string' || r.subject.length>80 || !r.subject.trim() || typeof r.student!=='string' || r.student.length>80 || !Number.isSafeInteger(r.fee) || r.fee<0 || r.fee>1000000000 || !Array.isArray(r.weekdays) || r.weekdays.length<1 || r.weekdays.length>7 || !r.weekdays.every(d=>Number.isInteger(d) && d>=0 && d<=6)) throw Error('Nội dung lớp không hợp lệ');
+          return {effective:r.effective,subject:r.subject,student:r.student,fee:r.fee,weekdays:[...new Set(r.weekdays)]};
+        }).sort((a,b)=>a.effective.localeCompare(b.effective));
+        return {id:c.id, endDate:c.endDate || null, revisions};
+      });
+      const absence={};
+      for(const [key,val] of Object.entries(value.absence)) if(val===true && key.length<150 && /^.+\|\d{4}-\d{2}-\d{2}$/.test(key)) absence[key]=true;
+      return {classes,absence};
+    }
+    function persist(){ try { localStorage.setItem(KEY,JSON.stringify(store)); return true; } catch(e) { alert('Không thể lưu dữ liệu trên thiết bị. Hãy kiểm tra dung lượng hoặc chế độ riêng tư.'); return false; } }
+    function notify(message){ const t=$('#toast'); t.textContent=message; t.classList.add('show'); clearTimeout(toastTimeout); toastTimeout=setTimeout(()=>t.classList.remove('show'),2600); }
+    function versionAt(c,date){ if(c.endDate && date>c.endDate) return null; let rev=null; for(const r of c.revisions){ if(r.effective<=date) rev=r; else break; } return rev; }
+    function revisionForEdit(c,date){ return versionAt(c,date) || [...c.revisions].reverse().find(r=>r.effective<=date) || c.revisions[0]; }
+    function sessionsOn(date){ const weekday=dateFrom(date).getDay(); let result=[]; for(const c of store.classes){ const v=versionAt(c,date); if(v && v.weekdays.includes(weekday)){ const absent=!!store.absence[`${c.id}|${date}`]; result.push({id:c.id,subject:v.subject,student:v.student,fee:v.fee,date,absent}); } } return result.sort((a,b)=>a.subject.localeCompare(b.subject,'vi')); }
+    function monthSessions(month){ const [y,m]=month.split('-').map(Number); const last=new Date(y,m,0).getDate(); const arr=[]; for(let d=1;d<=last;d++) arr.push(...sessionsOn(ymd(y,m-1,d))); return arr; }
+    function summarize(month){ const ss=monthSessions(month), paid=ss.filter(s=>!s.absent), earlier=paid.filter(s=>s.date<=today()), absent=ss.filter(s=>s.absent); return {total:paid.reduce((a,s)=>a+s.fee,0), earned:earlier.reduce((a,s)=>a+s.fee,0), paid:paid.length, already:earlier.length, absences:absent.length, lost:absent.reduce((a,s)=>a+s.fee,0)}; }
+    function monthTitle(m){const [y,mo]=m.split('-');return `Tháng ${Number(mo)}/${y}`; }
+    function dateLabel(s){ const d=dateFrom(s);return `${days[d.getDay()]}, ngày ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`; }
+    function setViewedMonth(v){ if(!/^\d{4}-\d{2}$/.test(v))return; const [y,m]=v.split('-').map(Number); if(!Number.isInteger(y) || y<1900 || y>2200 || m<1 || m>12)return; viewedMonth=v; const last=new Date(y,m,0).getDate(); const selNum=selectedDay.slice(0,7)===v ? Number(selectedDay.slice(8)) : Math.min(Number(today().slice(8)),last); selectedDay=ymd(y,m-1,Math.min(selNum,last)); render(); }
+    function render(){
+      $('#monthPicker').value=viewedMonth;
+      $('#overviewTitle').textContent=monthTitle(viewedMonth);
+      $('#overviewDesc').textContent='Tự tạo lịch theo các thứ học bạn đã chọn';
+      const info=summarize(viewedMonth);
+      $('#mainSalaryLabel').textContent=viewedMonth>=today().slice(0,7) ? 'Lương tháng (dự kiến)' : 'Lương tháng';
+      $('#monthSalary').textContent=fmt(info.total);
+      $('#monthSessions').textContent=`${info.paid} buổi được tính lương`;
+      $('#earnedSalary').textContent=fmt(info.earned);
+      $('#earnedSessions').textContent=`${info.already} buổi tính đến hôm nay`;
+      $('#absentCount').textContent=info.absences.toLocaleString('vi-VN');
+      $('#absentLoss').textContent=`${fmt(info.lost)} không tính lương`;
+      renderCalendar(); renderSelectedDay(); renderClasses(); renderHistory();
+      if($('#classDetailDialog').open && detailClassId) renderClassDetail();
+    }
+    function renderCalendar(){
+      const [y,m]=viewedMonth.split('-').map(Number); const last=new Date(y,m,0).getDate(); const first=(new Date(y,m-1,1).getDay()+6)%7;
+      let html=''; for(let i=0;i<first;i++) html+='<div class="day placeholder" aria-hidden="true"></div>';
+      for(let day=1;day<=last;day++) {
+        const date=ymd(y,m-1,day), ss=sessionsOn(date), good=ss.filter(s=>!s.absent), paid=good.reduce((a,s)=>a+s.fee,0), absent=ss.filter(s=>s.absent).length;
+        const classes=['day',date===selectedDay?'selected':'',date===today()?'today':''].filter(Boolean).join(' ');
+        html+=`<button type="button" class="${classes}" data-day="${date}" aria-label="Ngày ${day}, ${ss.length} buổi, ${fmt(paid)}"><span class="day-number">${day}</span>${ss.length ? `<span class="day-pay">${shortMoney(paid)}</span><span class="day-sub ${absent?'absent':''}">${absent?`${absent} buổi vắng`: `${ss.length} buổi`}</span>` : ''}</button>`;
+      }
+      $('#calendar').innerHTML=html;
+    }
+    function renderSelectedDay(){
+      $('#detailDate').textContent=dateLabel(selectedDay);
+      const ss=sessionsOn(selectedDay), paid=ss.filter(s=>!s.absent).reduce((a,s)=>a+s.fee,0);
+      $('#detailTotal').textContent=fmt(paid);
+      if(!ss.length){$('#lessons').innerHTML='<div class="no-lessons">Ngày này chưa có buổi học. Bạn có thể thêm lớp và chọn lịch học theo thứ.</div>';return;}
+      $('#lessons').innerHTML=ss.map(s=>`<div class="lesson"><div class="lesson-main"><div class="lesson-name">${escapeHTML(s.subject)}</div><div class="lesson-meta">${s.student?`Học sinh: ${escapeHTML(s.student)} · `:''}1 buổi theo lịch</div></div><div class="lesson-side"><div class="lesson-pay ${s.absent?'crossed':''}">${fmt(s.fee)}</div><label class="absent-flag"><input type="checkbox" data-absence="${escapeHTML(s.id)}" ${s.absent?'checked':''}><span>Nghỉ / vắng</span></label></div></div>`).join('');
+    }
+    function renderClasses(){
+      if(!store.classes.length){$('#classList').innerHTML='<div class="empty">Chưa có lớp học nào.<br>Nhấn <strong>+ Thêm lớp</strong> để bắt đầu.</div>';return;}
+      const all=monthSessions(viewedMonth);
+      $('#classList').innerHTML=store.classes.map(c=>{
+        const rev=revisionForEdit(c,`${viewedMonth}-01`), isStopped=c.endDate && c.endDate<`${viewedMonth}-01`, ss=all.filter(s=>s.id===c.id), counted=ss.filter(s=>!s.absent), paid=counted.reduce((a,s)=>a+s.fee,0), absences=ss.length-counted.length;
+        return `<div class="class-card"><button type="button" class="class-open" data-open-class="${escapeHTML(c.id)}" aria-label="Xem chi tiết học phí và ngày nghỉ lớp ${escapeHTML(rev.subject)}"><div class="class-top"><div><div class="class-title">${escapeHTML(rev.subject)}</div><div class="class-student">${rev.student?escapeHTML(rev.student):'Không ghi tên học sinh'}</div></div><div class="class-fee">${shortMoney(rev.fee)}/buổi</div></div><div class="chips">${orderDays.filter(d=>rev.weekdays.includes(d)).map(d=>`<span class="chip">${days[d]}</span>`).join('')}${isStopped?'<span class="chip stopped">Đã ngừng</span>':''}</div><div class="class-foot"><span>${counted.length} buổi · ${fmt(paid)} · ${absences} nghỉ</span><span class="view-detail">Xem chi tiết ›</span></div></button><div class="class-controls"><button type="button" class="btn small" data-edit="${escapeHTML(c.id)}">Sửa lịch / học phí</button></div></div>`;
+      }).join('');
+    }
+    function classSessions(c, month){ return monthSessions(month).filter(s=>s.id===c.id); }
+    function detailsForClass(c, month){
+      const ss=classSessions(c,month), report=ss.filter(s=>s.date<=today()), attended=report.filter(s=>!s.absent), absences=ss.filter(s=>s.absent), scheduled=ss.filter(s=>!s.absent);
+      return {ss,report,attended,absences,scheduled,monthlyPay:scheduled.reduce((n,s)=>n+s.fee,0),reportPay:attended.reduce((n,s)=>n+s.fee,0)};
+    }
+    function simpleDate(s){ const d=dateFrom(s); return `${p2(d.getDate())}/${p2(d.getMonth()+1)}`; }
+    function formattedDates(sessions){ return sessions.map(s=>simpleDate(s.date)).join(', ') || 'Không có'; }
+    function classRevisionAtEnd(c,month){ const [y,m]=month.split('-').map(Number);return revisionForEdit(c,ymd(y,m-1,new Date(y,m,0).getDate())); }
+    function buildParentMessage(c,month){
+      const rev=classRevisionAtEnd(c,month), d=detailsForClass(c,month);
+      const currentMonth=today().slice(0,7), status=month<currentMonth?'tổng kết':month===currentMonth?'tạm tính':'lịch dự kiến';
+      const student=rev.student?` của em ${rev.student}`:'';
+      const reportAbsences=d.report.filter(s=>s.absent), futureAbsences=d.absences.filter(s=>s.date>today());
+      const counts=new Map();for(const s of d.attended)counts.set(s.fee,(counts.get(s.fee)||0)+1);
+      const lineFee=counts.size ? [...counts.entries()].map(([fee,n])=>`${n} buổi × ${fmt(fee)}`).join(' + ') : '0 buổi';
+      const note=month===currentMonth?` (tính đến ngày ${dateFrom(today()).toLocaleDateString('vi-VN')})`:'';
+      const lines=[
+        `Dạ em xin gửi cô/chú thông tin ${status} học phí lớp ${rev.subject}${student} trong ${monthTitle(month).toLowerCase()}${note} ạ.`,
+        '',
+        `• Số buổi đã đến lịch: ${d.report.length} buổi.`,
+        `• Số buổi tính học phí: ${d.attended.length} buổi.`,
+        `• Ngày học: ${formattedDates(d.attended)}.`,
+        `• Ngày nghỉ/vắng (không tính phí): ${reportAbsences.length} buổi${reportAbsences.length?` – ${formattedDates(reportAbsences)}`:''}.`
+      ];
+      if(futureAbsences.length)lines.push(`• Ngày đã báo nghỉ sắp tới: ${formattedDates(futureAbsences)} (không tính phí).`);
+      lines.push(`• Cách tính: ${lineFee}.`,`• Tổng học phí${month>=currentMonth?' tạm tính đến hiện tại':''}: ${fmt(d.reportPay)}.`, '',`Em cảm ơn cô/chú ạ!`);
+      return lines.join('\n');
+    }
+    function renderClassDetail({resetMessage=true}={}){
+      const c=store.classes.find(x=>x.id===detailClassId);
+      if(!c){if($('#classDetailDialog').open)$('#classDetailDialog').close();detailClassId=null;return;}
+      const rev=classRevisionAtEnd(c,detailMonth), d=detailsForClass(c,detailMonth), currentMonth=today().slice(0,7);
+      $('#detailMonth').value=detailMonth;
+      $('#classDetailTitle').textContent=rev.subject;
+      $('#classDetailStudent').textContent=(rev.student?`Học sinh: ${rev.student} · `:'')+`${monthTitle(detailMonth)} · ${fmt(rev.fee)}/buổi (mức hiện tại)`;
+      $('#classDetailStats').innerHTML=`<div class="class-stat"><span class="label">${detailMonth>=currentMonth?'Lương dự kiến':'Lương cả tháng'}</span><strong>${fmt(d.monthlyPay)}</strong></div><div class="class-stat"><span class="label">Đã đến ngày (không vắng)</span><strong>${d.attended.length} buổi</strong></div><div class="class-stat"><span class="label">Nghỉ / vắng</span><strong>${d.absences.length} buổi</strong></div>`;
+      $('#classDetailFootnote').textContent=`Học phí của các buổi đã đến ngày: ${fmt(d.reportPay)}. ${detailMonth>=currentMonth?'Lương dự kiến cả tháng có thể bao gồm buổi học trong tương lai.':'Đã tổng kết toàn bộ các ngày có lịch trong tháng.'}`;
+      $('#classSessionSummary').textContent=`${d.ss.length} buổi theo lịch`;
+      $('#classDetailSessions').innerHTML=d.ss.length?d.ss.map(s=>{
+        const future=s.date>today();
+        return `<div class="detail-session"><div><div class="session-date">${escapeHTML(dateLabel(s.date))}</div><div class="session-fee">${fmt(s.fee)} / buổi</div></div><div class="session-right">${future?'<span class="session-future">Sắp tới</span>':!s.absent?'<span class="session-attended">Tính lương</span>':''}<label class="absent-flag"><input type="checkbox" data-class-absence="${escapeHTML(s.id)}" data-class-date="${s.date}" ${s.absent?'checked':''}><span>Nghỉ / vắng</span></label></div></div>`;
+      }).join(''):'<div class="empty">Tháng này chưa có buổi nào theo lịch của lớp.</div>';
+      if(resetMessage)$('#parentMessage').value=buildParentMessage(c,detailMonth);
+    }
+    function showClassDetail(id){
+      if(!store.classes.some(c=>c.id===id))return;
+      detailClassId=id;detailMonth=viewedMonth;renderClassDetail();$('#classDetailDialog').showModal();
+    }
+    function closeClassDetail(){ $('#classDetailDialog').close(); detailClassId=null; }
+    function setDetailMonth(month){
+      if(!/^\d{4}-\d{2}$/.test(month))return;
+      const [y,m]=month.split('-').map(Number);if(y<1900||y>2200||m<1||m>12)return;
+      detailMonth=month;renderClassDetail();
+    }
+    async function copyParentMessage(){
+      const textarea=$('#parentMessage'),message=textarea.value.trim();if(!message){notify('Chưa có tin nhắn để sao chép');return;}
+      try{
+        if(navigator.clipboard?.writeText && window.isSecureContext)await navigator.clipboard.writeText(message);
+        else {textarea.focus();textarea.select();if(!document.execCommand('copy'))throw Error('Không hỗ trợ sao chép');textarea.setSelectionRange(0,0);textarea.blur();}
+        notify('Đã sao chép! Hãy dán vào Zalo/Messenger để gửi.');
+      }catch(err){ textarea.focus();textarea.select();alert('Chưa thể tự sao chép. Hãy nhấn giữ vào tin nhắn để sao chép thủ công.'); }
+    }
+    async function shareParentMessage(){
+      const message=$('#parentMessage').value.trim();if(!message){notify('Chưa có nội dung để chia sẻ');return;}
+      if(!navigator.share){await copyParentMessage();return;}
+      try{await navigator.share({text:message});}catch(err){if(err.name!=='AbortError')alert('Không thể mở chia sẻ. Bạn có thể dùng nút Sao chép để gửi tin.');}
+    }
+    function renderHistory(){
+      const now=today().slice(0,7); let out=''; for(let i=0;i<6;i++){const month=addMonth(now,-i), data=summarize(month); out+=`<button type="button" data-history="${month}" class="history-item"><span>${monthTitle(month)}</span><strong>${fmt(data.total)}</strong><span>${data.paid} buổi · ${data.absences} vắng</span></button>`; } $('#history').innerHTML=out;
+    }
+    function showForm(id=null){
+      editingId=id;
+      const c=id ? store.classes.find(x=>x.id===id) : null;
+      if(id && !c)return;
+      const rev=c ? revisionForEdit(c,`${viewedMonth}-01`) : null;
+      $('#dialogTitle').textContent=c?'Chỉnh sửa lịch lớp':'Thêm lớp mới';
+      $('#subject').value=rev?.subject || '';
+      $('#student').value=rev?.student || '';
+      $('#fee').value=rev?.fee ?? '';
+      $('#effective').value=`${viewedMonth}-01`;
+      $('#effectiveLabel').textContent=c?'Áp dụng thay đổi từ ngày *':'Bắt đầu dạy từ ngày *';
+      $('#effectiveHint').textContent=c?'Các ngày trước mốc này được giữ nguyên lịch và mức lương cũ.':'Lịch sẽ tự xuất hiện từ ngày này trở đi.';
+      $('#formNote').textContent=c?'Mỗi lần chỉnh sửa, lịch và giá mới chỉ áp dụng từ ngày chọn. Các tháng trước đó vẫn giữ nguyên.':'Bạn có thể chọn nhiều thứ. Ví dụ chọn T3 và T5 để tự tạo lịch hàng tuần.';
+      document.querySelectorAll('#weekSelect input').forEach(x=>x.checked=!!rev?.weekdays.includes(Number(x.value)));
+      $('#stopClass').hidden=!c;
+      $('#deleteClass').hidden=!c;
+      $('#classDialog').showModal();
+      $('#subject').focus();
+    }
+    function hideForm(){ $('#classDialog').close(); editingId=null; }
+    function saveForm(e){
+      e.preventDefault();
+      const subject=$('#subject').value.trim(), student=$('#student').value.trim(), fee=Number($('#fee').value), effective=$('#effective').value;
+      const weekdays=[...document.querySelectorAll('#weekSelect input:checked')].map(x=>Number(x.value));
+      if(!subject || !Number.isSafeInteger(fee) || fee<0 || fee>1000000000 || !validDate(effective) || !weekdays.length){alert('Vui lòng nhập tên lớp, số tiền hợp lệ, ngày hiệu lực và chọn ít nhất một thứ học.');return;}
+      if(subject.length>80 || student.length>80){alert('Tên môn/học sinh quá dài.');return;}
+      const rev={effective,subject,student,fee,weekdays};
+      if(editingId){const c=store.classes.find(x=>x.id===editingId);if(!c)return;
+        if(c.endDate && effective>c.endDate){alert('Lớp này đã ngừng. Bạn có thể chỉnh sửa từ ngày trước khi ngừng, hoặc tạo một lớp mới.');return;}
+        const idx=c.revisions.findIndex(r=>r.effective===effective);
+        if(idx>=0)c.revisions[idx]=rev; else c.revisions.push(rev);
+        c.revisions.sort((a,b)=>a.effective.localeCompare(b.effective));
+      } else store.classes.push({id:newId(),endDate:null,revisions:[rev]});
+      if(!persist())return; hideForm(); setViewedMonth(effective.slice(0,7)); notify('Đã lưu lớp và cập nhật lịch tự động');
+    }
+    function stopClass(){const c=store.classes.find(x=>x.id===editingId);if(!c)return;const effective=$('#effective').value;
+      if(!validDate(effective)){alert('Hãy chọn ngày ngừng lớp hợp lệ.');return;}
+      if(effective<=c.revisions[0].effective){alert('Ngày ngừng phải sau ngày bắt đầu. Để xóa lớp nhập nhầm, hãy chọn Xóa lớp.');return;}
+      if(!confirm(`Ngừng lớp từ ngày ${dateFrom(effective).toLocaleDateString('vi-VN')}? Các buổi đã dạy trước ngày này vẫn được giữ lại.`))return;
+      c.endDate=dayBefore(effective); if(!persist())return;hideForm();render();notify('Đã ngừng lớp, lịch cũ vẫn được giữ');
+    }
+    function deleteClass(){const c=store.classes.find(x=>x.id===editingId);if(!c)return;const name=c.revisions[c.revisions.length-1].subject;
+      if(!confirm(`XÓA VĨNH VIỄN lớp "${name}" và toàn bộ lịch sử lương của lớp này? Hành động này không thể hoàn tác nếu chưa sao lưu.`))return;
+      store.classes=store.classes.filter(x=>x.id!==editingId);
+      Object.keys(store.absence).forEach(k=>{if(k.startsWith(`${editingId}|`))delete store.absence[k];});
+      if(!persist())return;hideForm();render();notify('Đã xóa lớp');
+    }
+    function backup(){const data=JSON.stringify({format:'luong-gia-su-v1',exportedAt:new Date().toISOString(),classes:store.classes,absence:store.absence},null,2);
+      const blob=new Blob([data],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`luong-gia-su-sao-luu-${today()}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);notify('Đã tạo file sao lưu JSON');
+    }
+    async function restore(e){const file=e.target.files?.[0];e.target.value='';if(!file)return;
+      try{const data=JSON.parse(await file.text());const parsed=validate(data);
+        if(!confirm('Khôi phục dữ liệu từ file này? Toàn bộ dữ liệu hiện tại trên thiết bị sẽ bị thay thế.'))return;
+        const before=store;store=parsed;if(!persist()){store=before;return;}render();notify(`Đã khôi phục ${store.classes.length} lớp`);
+      }catch(err){alert('Không thể khôi phục: '+err.message);}
+    }
+    $('#addBtn').addEventListener('click',()=>showForm());
+    $('#addSmall').addEventListener('click',()=>showForm());
+    $('#closeDialog').addEventListener('click',hideForm);
+    $('#cancelDialog').addEventListener('click',hideForm);
+    $('#classDialog').addEventListener('click',e=>{if(e.target===$('#classDialog'))hideForm();});
+    $('#classForm').addEventListener('submit',saveForm);
+    $('#stopClass').addEventListener('click',stopClass);
+    $('#deleteClass').addEventListener('click',deleteClass);
+    $('#prevMonth').addEventListener('click',()=>setViewedMonth(addMonth(viewedMonth,-1)));
+    $('#nextMonth').addEventListener('click',()=>setViewedMonth(addMonth(viewedMonth,1)));
+    $('#monthPicker').addEventListener('change',e=>setViewedMonth(e.target.value));
+    $('#calendar').addEventListener('click',e=>{const b=e.target.closest('[data-day]');if(!b)return;selectedDay=b.dataset.day;renderCalendar();renderSelectedDay();});
+    $('#lessons').addEventListener('change',e=>{const el=e.target.closest('[data-absence]');if(!el)return; const key=`${el.dataset.absence}|${selectedDay}`;if(el.checked)store.absence[key]=true;else delete store.absence[key];if(!persist())return;render();notify(el.checked?'Đã đánh dấu vắng, trừ lương buổi này':'Đã bỏ đánh dấu vắng, cộng lại lương');});
+    $('#classList').addEventListener('click',e=>{
+      const edit=e.target.closest('[data-edit]');if(edit){showForm(edit.dataset.edit);return;}
+      const open=e.target.closest('[data-open-class]');if(open)showClassDetail(open.dataset.openClass);
+    });
+    $('#closeClassDetail').addEventListener('click',closeClassDetail);
+    $('#classDetailDialog').addEventListener('click',e=>{if(e.target===$('#classDetailDialog'))closeClassDetail();});
+    $('#classDetailDialog').addEventListener('close',()=>{detailClassId=null;});
+    $('#detailPrev').addEventListener('click',()=>setDetailMonth(addMonth(detailMonth,-1)));
+    $('#detailNext').addEventListener('click',()=>setDetailMonth(addMonth(detailMonth,1)));
+    $('#detailMonth').addEventListener('change',e=>setDetailMonth(e.target.value));
+    $('#classDetailSessions').addEventListener('change',e=>{
+      const input=e.target.closest('[data-class-absence]');if(!input)return;
+      const date=input.dataset.classDate, id=input.dataset.classAbsence;
+      if(!sessionsOn(date).some(s=>s.id===id))return;
+      const key=`${id}|${date}`;
+      if(input.checked)store.absence[key]=true;else delete store.absence[key];
+      if(!persist())return;
+      render();notify(input.checked?'Buổi vắng đã được trừ khỏi học phí':'Đã tính lại học phí cho buổi này');
+    });
+    $('#regenParentMessage').addEventListener('click',()=>{
+      const c=store.classes.find(x=>x.id===detailClassId);if(c){$('#parentMessage').value=buildParentMessage(c,detailMonth);notify('Đã tạo lại tin nhắn theo lịch hiện tại');}
+    });
+    $('#copyParentMessage').addEventListener('click',copyParentMessage);
+    $('#shareParentMessage').addEventListener('click',shareParentMessage);
+    $('#history').addEventListener('click',e=>{const b=e.target.closest('[data-history]');if(b){setViewedMonth(b.dataset.history);window.scrollTo({top:0,behavior:'smooth'});}});
+    $('#backupBtn').addEventListener('click',backup);
+    $('#restoreBtn').addEventListener('click',()=>$('#restoreFile').click());
+    $('#restoreFile').addEventListener('change',restore);
+    render();
+    if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')) navigator.serviceWorker.register('./sw.js').catch(console.warn);
+  </script>
+</body>
+</html>
